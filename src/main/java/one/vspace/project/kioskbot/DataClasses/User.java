@@ -5,13 +5,22 @@ public class User {
     private Long userID;
     private long registerDate;
     private String name;
-    private double amount;
+    private double credit;
+    private String tagId;
 
-    public User(Long userID, long registerDate, String name, double amount) {
+    public User(Long userID, long registerDate, String name, double credit) {
         this.userID = userID;
         this.registerDate = registerDate;
         this.name = name;
-        this.amount = amount;
+        this.credit = credit;
+    }
+
+    public User(Long userID, long registerDate, String name, double credit, String tagId) {
+        this.userID = userID;
+        this.registerDate = registerDate;
+        this.name = name;
+        this.credit = credit;
+        this.tagId = tagId;
     }
 
     public User() {
@@ -42,11 +51,19 @@ public class User {
         this.registerDate = registerDate;
     }
 
-    public double getAmount() {
-        return amount;
+    public double getCredit() {
+        return credit;
     }
 
-    public void setAmount(double amount) {
-        this.amount = amount;
+    public void setAmount(double credit) {
+        this.credit = credit;
+    }
+
+    public String getTagId() {
+        return tagId;
+    }
+
+    public void setTagId(String tagId) {
+        this.tagId = tagId;
     }
 }

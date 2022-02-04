@@ -42,6 +42,8 @@ public class BotController {
     private final int REQUEST_DELETE = 66;
     private final int REQUEST_REMOVE_AMOUNT = 55;
     private final int REQUEST_TRANSPONDER = 44;
+    private final int REQUEST_NEW_USER = 33;
+    private final int REQUEST_NEW_TRANSPONDER_USER = 22;
 
     private static final Logger LOG = LoggerFactory.getLogger(BotController.class);
 
@@ -194,6 +196,26 @@ public class BotController {
                                     break;
                                 case REQUEST_TRANSPONDER:
                                     String transponderId = update.message().text();
+                                    dbService.setTransponder(userID, transponderId, db);
+                                    sendMessage(userID, "Your account has been connected with Tag " + transponderId + ".");
+                                    requestMap.remove(userID);
+                                    break;
+                                case REQUEST_NEW_USER:
+                                    if(update.message().text().equals("/yes")){
+                                        sendMessage(userID, "Please tell me your TagID."
+                                                + "That can be seen in the top left corner of the physical kiosk after scanning your tag.");
+                                        requestMap.put(userID, REQUEST_NEW_TRANSPONDER_USER);
+                                    } else if(update.message().text().equals("/no")){
+                                        registerUser(userID, update, db);
+                                    } else {
+                                        sendMessage(userID, "Unknown Responce. Cancelling action!");
+                                    }
+                                    requestMap.remove(userID);
+                                    break;
+                                case REQUEST_NEW_TRANSPONDER_USER:
+                                    registerTransponderUser(userID, update, db);
+                                    requestMap.remove(userID);
+                                    break;
                             }
                         } else {
                             sendMessage(userID, "Unknown command!");
@@ -319,29 +341,56 @@ public class BotController {
                 sendMessage(userID, "Your Name: " + currentUser.getName()
                         + "\nYour Chat-ID: " + currentUser.getUserID()
                         + "\nMember since: " + new Date(currentUser.getRegisterDate())
-                        + "\nCurrent amount: " + String.valueOf(decimalFormat.format(currentUser.getAmount())).replace(".", ",") + "€");
+                        + "\nCurrent amount: " + String.valueOf(decimalFormat.format(currentUser.getCredit())).replace(".", ",") + "€");
             } catch (UserNotFoundException e) {
                 sendMessage(userID, "User not found!");
                 e.printStackTrace();
             }
         }
 
-        private void registerCommandExecuted (Long userID, Update update, MongoClient mongoClient){
-            if (dbService.haveUserAccountInDB(userID, mongoClient) == -1) {
-                User newUser;
-                String firstName = update.message().from().firstName();
-                String lastName = update.message().from().lastName();
-                if (lastName == null) {
-                    newUser = new User(userID, date.getTime(), (firstName), 0);
-                } else if (firstName == null) {
-                    newUser = new User(userID, date.getTime(), (lastName), 0);
-                } else {
-                    newUser = new User(userID, date.getTime(), (firstName + " " + lastName), 0);
-                }
-                dbService.addNewUser(newUser, mongoClient);
-                sendMessage(userID, "Hallo " + firstName + ", your account have been created.");
+        private void registerTransponderUser(Long userID, Update update, MongoClient mongoClient){
+            User newUser;
+            String firstName = update.message().from().firstName();
+            String lastName = update.message().from().lastName();
+            String tagId = update.message().text();
+            if (lastName == null) {
+                newUser = new User(userID, date.getTime(), firstName, 0, tagId);
+            } else if (firstName == null) {
+                newUser = new User(userID, date.getTime(), lastName, 0, tagId);
             } else {
-                sendMessage(userID, "Sorry " + update.message().from().firstName() + ", you already have an account.");
+                newUser = new User(userID, date.getTime(), (firstName + " " + lastName), 0, tagId);
+            }
+            dbService.setUserToExistingTransponder(newUser, mongoClient);
+            sendMessage(userID, "Hallo " + firstName + ", your account have been created."
+                    + "Your TagID is " + tagId);
+        }
+
+        private void registerUser(Long userID, Update update, MongoClient mongoClient){
+            User newUser;
+            String firstName = update.message().from().firstName();
+            String lastName = update.message().from().lastName();
+            if (lastName == null) {
+                newUser = new User(userID, date.getTime(), (firstName), 0);
+            } else if (firstName == null) {
+                newUser = new User(userID, date.getTime(), (lastName), 0);
+            } else {
+                newUser = new User(userID, date.getTime(), (firstName + " " + lastName), 0);
+            }
+            dbService.addNewUser(newUser, mongoClient);
+            sendMessage(userID, "Hallo " + firstName + ", your account have been created.");
+        }
+
+        private void registerCommandExecuted (Long userID, Update update, MongoClient mongoClient){
+            if (!requestMap.containsKey(userID)) {
+                if (dbService.haveUserAccountInDB(userID, mongoClient) == -1) {
+                    sendMessage(userID, "Do you have already a transponder from the physical kiosk system?"
+                            + "Send /yes if you have and /no if not.");
+                    requestMap.put(userID, REQUEST_NEW_USER);
+                } else {
+                    sendMessage(userID, "Sorry " + update.message().from().firstName() + ", you already have an account.");
+                }
+            } else {
+                sendMessage(userID, "Please finish your existing operation first.");
             }
         }
 
