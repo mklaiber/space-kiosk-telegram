@@ -65,7 +65,7 @@ public class BotController {
 
     private String token = "";
 
-    private WebDavService webDavDrinkAcessor = new WebDavService();
+    private WebDavService webDavDrinkAcessor = new WebDavService(getConfigValues());
 
     private List<Drink> drinkList = new ArrayList<>();
 
@@ -96,7 +96,7 @@ public class BotController {
 
     public void updateDrinkList() {
         lastDrinkUpdate = date.getTime();
-        String[] drinks = webDavDrinkAcessor.download( getConfigValues()).replace(',', '.').split("\n");
+        String[] drinks = webDavDrinkAcessor.download().replace(',', '.').split("\n");
         for (String drink : drinks) {
             String[] finalDrinks = drink.trim().split(";");
             drinkList.add(new Drink(finalDrinks[0], Float.parseFloat(finalDrinks[1]), finalDrinks[2]));
@@ -118,107 +118,107 @@ public class BotController {
     public void process(Update update) {
 
         MongoClient db = DBConnector.getConnection(configValues);
-        long userID = update.message().from().id();
+        long userId = update.message().from().id();
 
         if ((lastDrinkUpdate - date.getTime() - 3600) > 0) {
             lastDrinkUpdate = date.getTime();
             updateDrinkList();
         }
 
-        if ((dbService.haveUserAccountInDB(userID, db) == 1) || update.message().text().equals("/register") || update.message().text().equals("/start")) {
+        if ((dbService.haveUserAccountInDB(userId, db) == 1) || update.message().text().equals("/register") || update.message().text().equals("/start")) {
             if (update.message().text() != null) {
                 switch (update.message().text()) {
                     case Commands.START_COMMAND:
-                        startCommandExecuted(userID, update, db);
+                        startCommandExecuted(update, db);
                         break;
                     case Commands.REGISTER_COMMAND:
-                        registerCommandExecuted(userID, update, db);
+                        registerCommandExecuted(update, db);
                         break;
                     case Commands.INFO_COMMAND:
-                        infoCommandExecuted(userID, update, db);
+                        infoCommandExecuted(update, db);
                         break;
                     case Commands.NAME_COMMAND:
-                        nameCommandExecuted(userID, update, db);
+                        nameCommandExecuted(update, db);
                         break;
                     case Commands.TRANSPONDER_COMMAND:
-                        transponderCommandExecuted(userID, update, db);
+                        transponderCommandExecuted(update, db);
                         break;
                     case Commands.DELETE_COMMAND:
-                        deleteCommandExecuted(userID, update, db);
+                        deleteCommandExecuted(update, db);
                         break;
                     case Commands.CODE_COMMAND:
-                        codeCommandExecuted(userID, update, db);
+                        codeCommandExecuted(update, db);
                         break;
                     case Commands.UPDATE_COMMAND:
-                        updateCommandExecuted(userID, update, db);
+                        updateCommandExecuted(update, db);
                         break;
                     case Commands.ADD_COMMAND:
-                        addCommandExecuted(userID, update, db);
+                        addCommandExecuted(update, db);
                         break;
                     case Commands.REMOVE_COMMAND:
-                        removeCommandExecuted(userID, update, db);
+                        removeCommandExecuted(update, db);
                         break;
                     case Commands.GET_COMMAND:
-                        getCommandExecuted(userID, update, db);
+                        getCommandExecuted(update, db);
                         break;
                     default:
-                        if (requestMap.containsKey(userID)) {
+                        if (requestMap.containsKey(userId)) {
                             float amount;
-                            switch (requestMap.get(userID)) {
+                            switch (requestMap.get(userId)) {
                                 case REQUESTED_ADD_AMOUNT:
                                     amount = Float.parseFloat(update.message().text().replace(",", ".").replace("€", ""));
-                                    dbService.setAmount(userID, db, amount);
-                                    sendMessage(userID, decimalFormat.format(amount) + "€ has been added to your account.");
-                                    requestMap.remove(userID);
+                                    dbService.setAmount(userId, db, amount);
+                                    sendMessage(userId, decimalFormat.format(amount) + "€ has been added to your account.");
+                                    requestMap.remove(userId);
                                     break;
                                 case REQUESTED_NAME:
                                     String name = update.message().text();
-                                    dbService.setName(userID, db, name);
-                                    sendMessage(userID, "Your name has been set to " + name + ".");
-                                    requestMap.remove(userID);
+                                    dbService.setName(userId, db, name);
+                                    sendMessage(userId, "Your name has been set to " + name + ".");
+                                    requestMap.remove(userId);
                                     break;
                                 case REQUEST_DELETE:
                                     if (update.message().text().equals("Yes, I want to delete everything.")) {
-                                        dbService.deleteUser(userID, db);
-                                        sendMessage(userID, "All data stored about you has been deleted!");
+                                        dbService.deleteUser(userId, db);
+                                        sendMessage(userId, "All data stored about you has been deleted!");
                                     } else {
-                                        sendMessage(userID, "Operation canceled.");
+                                        sendMessage(userId, "Operation canceled.");
                                     }
-                                    requestMap.remove(userID);
+                                    requestMap.remove(userId);
                                     break;
                                 case REQUEST_REMOVE_AMOUNT:
                                     amount = Float.parseFloat(update.message().text().replace(",", ".").replace("€", ""));
-                                    dbService.setAmount(userID, db, amount * -1);
-                                    sendMessage(userID, "Your amount has been adjusted by "
+                                    dbService.setAmount(userId, db, amount * -1);
+                                    sendMessage(userId, "Your amount has been adjusted by "
                                             + decimalFormat.format(amount) + "€ to "
-                                            + decimalFormat.format(dbService.getAmount(userID, db)) + "€.");
-                                    requestMap.remove(userID);
+                                            + decimalFormat.format(dbService.getAmount(userId, db)) + "€.");
+                                    requestMap.remove(userId);
                                     break;
                                 case REQUEST_TRANSPONDER:
                                     String transponderId = update.message().text();
-                                    dbService.setTransponder(userID, transponderId, db);
-                                    sendMessage(userID, "Your account has been connected with Tag " + transponderId + ".");
-                                    requestMap.remove(userID);
+                                    dbService.setTransponder(userId, transponderId, db);
+                                    sendMessage(userId, "Your account has been connected with Tag " + transponderId + ".");
+                                    requestMap.remove(userId);
                                     break;
                                 case REQUEST_NEW_USER:
                                     if(update.message().text().equals("/yes")){
-                                        sendMessage(userID, "Please tell me your TagID."
+                                        sendMessage(userId, "Please tell me your TagID."
                                                 + "That can be seen in the top left corner of the physical kiosk after scanning your tag.");
-                                        requestMap.put(userID, REQUEST_NEW_TRANSPONDER_USER);
+                                        requestMap.put(userId, REQUEST_NEW_TRANSPONDER_USER);
                                     } else if(update.message().text().equals("/no")){
-                                        registerUser(userID, update, db);
+                                        registerUser(update, db);
                                     } else {
-                                        sendMessage(userID, "Unknown Responce. Cancelling action!");
+                                        sendMessage(userId, "Unknown Responce. Cancelling action!");
                                     }
-                                    requestMap.remove(userID);
+                                    requestMap.remove(userId);
                                     break;
                                 case REQUEST_NEW_TRANSPONDER_USER:
-                                    registerTransponderUser(userID, update, db);
-                                    requestMap.remove(userID);
+                                    registerTransponderUser(update, db);
+                                    requestMap.remove(userId);
                                     break;
                             }
                         } else {
-                            sendMessage(userID, "Unknown command!");
+                            sendMessage(userId, "Unknown command!");
                         }
 
                 }
@@ -235,44 +235,46 @@ public class BotController {
                     BufferedImage bufferedImage = ImageIO.read(new URL(fullPath));
                     codeContent = new DecodeBarCodeService().decodeCode(bufferedImage);
                     currentDrink = getDrinkWithCode(codeContent);
-                    dbService.setAmount(userID, db, currentDrink.getCost() * -1);
-                    sendMessage(userID, "Code: " + codeContent + ","
+                    dbService.setAmount(userId, db, currentDrink.getCost() * -1);
+                    sendMessage(userId, "Code: " + codeContent + ","
                             + "\nProduct: " + currentDrink.getName() + ","
                             + "\nCost: " + decimalFormat.format(currentDrink.getCost()) + "€"
-                            + "\nNew amount: " + decimalFormat.format(dbService.getAmount(userID, db)) + "€");
+                            + "\nNew amount: " + decimalFormat.format(dbService.getAmount(userId, db)) + "€");
                     LOG.info(update.message().from().lastName() + ", "
                             + update.message().from().firstName()
                             + " Code: "
                             + codeContent);
                 } catch (IOException e) {
-                    sendMessage(userID, "An error occurred!");
+                    sendMessage(userId, "An error occurred!");
                     LOG.error("IOException");
                 } catch (ReaderException e) {
-                    sendMessage(userID, "Send as uncompressed file!");
+                    sendMessage(userId, "Send as uncompressed file!");
                     LOG.error("No code in the picture");
                 } catch (NumberFormatException e) {
-                    sendMessage(userID, "Code: " + codeContent);
+                    sendMessage(userId, "Code: " + codeContent);
                     LOG.info(update.message().from().lastName() + ", " + update.message().from().firstName() + " Code: " + codeContent);
                 } catch (NullPointerException e) {
-                    sendMessage(userID, "No supported file!");
+                    sendMessage(userId, "No supported file!");
                 } catch (ArticleNotFoundException e) {
-                    sendMessage(userID, "No article Found!");
+                    sendMessage(userId, "No article Found!");
                     LOG.error("Article not found!");
                 }
             } else {
-                sendMessage(userID, "Filetype not supported!");
+                sendMessage(userId, "Filetype not supported!");
             }
         } else {
-            sendMessage(userID, "Please make an account first!");
+            sendMessage(userId, "Please make an account first!");
         }
     }
 
-        private void getCommandExecuted (Long userID, Update update, MongoClient db){
+        private void getCommandExecuted (Update update, MongoClient db){
+            long userID = update.message().from().id();
             sendMessage(userID, "Your current amount ist " + decimalFormat.format(dbService.getAmount(userID, db)) + "€");
         }
 
 
-        private void removeCommandExecuted (Long userID, Update update, MongoClient db){
+        private void removeCommandExecuted (Update update, MongoClient db){
+            long userID = update.message().from().id();
             if (!requestMap.containsKey(userID)) {
                 requestMap.put(userID, REQUEST_REMOVE_AMOUNT);
                 sendMessage(userID, "Please enter the amount you want to remove.");
@@ -281,7 +283,8 @@ public class BotController {
             }
         }
 
-        private void addCommandExecuted (Long userID, Update update, MongoClient db){
+        private void addCommandExecuted (Update update, MongoClient db){
+            long userID = update.message().from().id();
             if (!requestMap.containsKey(userID)) {
                 requestMap.put(userID, REQUESTED_ADD_AMOUNT);
                 sendMessage(userID, "Please enter the amount to add.");
@@ -290,12 +293,14 @@ public class BotController {
             }
         }
 
-        private void updateCommandExecuted (Long userID, Update update, MongoClient db){
+        private void updateCommandExecuted (Update update, MongoClient db){
+            long userID = update.message().from().id();
             updateDrinkList();
             sendMessage(userID, "Drinklist has been successfully updated.");
         }
 
-        private void codeCommandExecuted (Long userID, Update update, MongoClient db){
+        private void codeCommandExecuted (Update update, MongoClient db){
+            long userID = update.message().from().id();
             String code = update.message().text().split(" ")[1];
             Drink currentDrink = null;
             try {
@@ -308,7 +313,8 @@ public class BotController {
                     + ", Product: " + currentDrink.getName() + ", Kosten: " + currentDrink.getCost() + "€");
         }
 
-        private void deleteCommandExecuted (Long userID, Update update, MongoClient db){
+        private void deleteCommandExecuted (Update update, MongoClient db){
+            long userID = update.message().from().id();
             if (!requestMap.containsKey(userID)) {
                 requestMap.put(userID, REQUEST_DELETE);
                 sendMessage(userID, "Please enter \"Yes, I want to delete everything.\".");
@@ -317,7 +323,8 @@ public class BotController {
             }
         }
 
-        private void transponderCommandExecuted (Long userID, Update update, MongoClient db){
+        private void transponderCommandExecuted (Update update, MongoClient db){
+            long userID = update.message().from().id();
             if (!requestMap.containsKey(userID)) {
                 requestMap.put(userID, REQUEST_TRANSPONDER);
                 sendMessage(userID, "Enter your transponder ID.");
@@ -326,7 +333,8 @@ public class BotController {
             }
         }
 
-        private void nameCommandExecuted (Long userID, Update update, MongoClient db){
+        private void nameCommandExecuted (Update update, MongoClient db){
+            long userID = update.message().from().id();
             if (!requestMap.containsKey(userID)) {
                 requestMap.put(userID, REQUESTED_NAME);
                 sendMessage(userID, "Please enter your new name.");
@@ -335,7 +343,8 @@ public class BotController {
             }
         }
 
-        private void infoCommandExecuted (Long userID, Update update, MongoClient mongoClient){
+        private void infoCommandExecuted (Update update, MongoClient mongoClient){
+            long userID = update.message().from().id();
             try {
                 User currentUser = dbService.getUser(userID, mongoClient);
                 sendMessage(userID, "Your Name: " + currentUser.getName()
@@ -348,7 +357,8 @@ public class BotController {
             }
         }
 
-        private void registerTransponderUser(Long userID, Update update, MongoClient mongoClient){
+        private void registerTransponderUser(Update update, MongoClient mongoClient){
+            long userID = update.message().from().id();
             User newUser;
             String firstName = update.message().from().firstName();
             String lastName = update.message().from().lastName();
@@ -365,7 +375,8 @@ public class BotController {
                     + "Your TagID is " + tagId);
         }
 
-        private void registerUser(Long userID, Update update, MongoClient mongoClient){
+        private void registerUser(Update update, MongoClient mongoClient){
+            long userID = update.message().from().id();
             User newUser;
             String firstName = update.message().from().firstName();
             String lastName = update.message().from().lastName();
@@ -380,7 +391,8 @@ public class BotController {
             sendMessage(userID, "Hallo " + firstName + ", your account have been created.");
         }
 
-        private void registerCommandExecuted (Long userID, Update update, MongoClient mongoClient){
+        private void registerCommandExecuted (Update update, MongoClient mongoClient){
+            long userID = update.message().from().id();
             if (!requestMap.containsKey(userID)) {
                 if (dbService.haveUserAccountInDB(userID, mongoClient) == -1) {
                     sendMessage(userID, "Do you have already a transponder from the physical kiosk system?"
@@ -394,7 +406,8 @@ public class BotController {
             }
         }
 
-        private void startCommandExecuted (Long userID, Update update, MongoClient mongoClient){
+        private void startCommandExecuted (Update update, MongoClient mongoClient){
+            long userID = update.message().from().id();
             sendMessage(userID, "Hi! Please send a picture of the barcode as UNCOMPRESSED file!"
                     + "\nOtherwise a correct detection cannot be guaranteed."
                     + "\nPlease type /register to start.");

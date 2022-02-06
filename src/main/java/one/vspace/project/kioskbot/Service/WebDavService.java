@@ -1,5 +1,8 @@
 package one.vspace.project.kioskbot.Service;
 
+
+import com.github.sardine.Sardine;
+import com.github.sardine.SardineFactory;
 import one.vspace.project.kioskbot.DataClasses.ConfigValues;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -12,10 +15,15 @@ import java.net.URLConnection;
 
 public class WebDavService {
 
+    private static ConfigValues configValues;
+
+    public WebDavService(ConfigValues configValues){
+        this.configValues = configValues;
+    }
+
     private static final Logger LOGGER = LoggerFactory.getLogger(WebDavService.class);
 
-
-    public String download( ConfigValues configValues) {
+    public String download() {
         ByteArrayOutputStream out = null;
         URLConnection conn = null;
         InputStream in = null;
@@ -40,8 +48,8 @@ public class WebDavService {
                 numWritten += numRead;
             }
             return out.toString();
-        } catch (Exception exception) {
-            exception.printStackTrace();
+        } catch (Exception e) {
+            e.printStackTrace();
             return null;
         } finally {
             try {
@@ -55,4 +63,11 @@ public class WebDavService {
             }
         }
     }
+
+    public String downloadWebDav(){
+        //Sardine sardine = new SardineFactory.begin(configValues.getWebdavUserId(), configValues.getWebdavPassword());
+
+        return "";
+    }
+
 }
