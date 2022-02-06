@@ -13,18 +13,21 @@ The Drinks Configuration is setup via a .csv/.txt file on an WebDav Directory.
 The scheme is:
 ``<name of beverage>;<price as float>;<ean-code>\n``
 
+When you create a .csv file, this scheme is provided automatically.
+
 ## Bot
 
 ### Configuration
 
-To configure the bot fully you need to provide either the config.json or an empty one when using environment variables instead (recommended usage for the docker images).
+To configure the bot fully you need to provide either the config.json in the /credentials folder, or an empty one when using environment variables instead (recommended usage for the docker images).
 
 ```
 {
   "telegramBotToken" : "TelegramBotToken",
   "webdavUserId" : "userNameForWebdavAccess",
   "webdavPassword" : "passwordForWebdavAccess",
-  "webdavFilePath" : "fullWebdavUrlToFile",
+  "webdavURI" : "fullWebdavURI",
+  "webdavFileName : "fullFilename",
   "mongoDBHostName" : "mongoDBHostname",
   "mongoDBHostPort" : "mongoDBPort",
   "mongoDBDatabaseName" : "mongoDBDatabaseName",
@@ -37,9 +40,11 @@ To configure the bot fully you need to provide either the config.json or an empt
 
 `webdavPassword`: (Required) Password for accessing the beverage configuration file on the remote server.
 
-`webdavFilePath`: (Required) The full WebDav URI to the beverage configuration file on the remote server.
+`webdavURI`: (Required) The full WebDav URI to the remote server.
 
-`mongoDBHostName`: (Required) MongoDB Hostname. eg.: `localhost`
+`webdavFileName`: (Required) The filename of the beverage configuration file on the remote server including the filetype.
+
+`mongoDBHostName`: (Required) MongoDB Hostname. e.g.: `localhost`
 
 `mongoDBHostPort`: (Required) MongoDB Port. Normally `27017`
 
@@ -63,6 +68,8 @@ To configure the bot fully you need to provide either the config.json or an empt
 `/get`: Current amount on the debit-system.
 
 `/remove` : Removes manual amount from the debit-system.
+
+`/transponder` : Add your tag ID to your account. Can also be used to connect an existing credit to your new Account.
 
 `/name`: If you want to set a new name.
 

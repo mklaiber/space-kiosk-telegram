@@ -1,6 +1,6 @@
 package one.vspace.project.kioskbot.DataClasses;
 
-public class Commands {
+public class Constants {
 
     public static final String START_COMMAND = "/start";
     public static final String REGISTER_COMMAND = "/register";
@@ -13,5 +13,13 @@ public class Commands {
     public static final String DELETE_COMMAND = "/delete";
     public static final String CODE_COMMAND = "/code";
     public static final String UPDATE_COMMAND = "/update";
+    public static final String NO_TAG = "NO_TAG_AVAILABLE";
 
+    public static final String REQUESTED_ADD_AMOUNT = "ADD_AMOUNT";
+    public static final String REQUESTED_NAME = "SET_NAME";
+    public static final String REQUEST_DELETE = "DELETE_EVERYTHING";
+    public static final String REQUEST_REMOVE_AMOUNT = "REMOVE_AMOUNT";
+    public static final String REQUEST_TRANSPONDER = "ADD_TRANSPONDER";
+    public static final String REQUEST_NEW_USER = "ADD_NEW_USER";
+    public static final String REQUEST_NEW_TRANSPONDER_USER = "ADD_NEW_TRANSPONDER_USER";
 }
