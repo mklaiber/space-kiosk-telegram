@@ -8,10 +8,10 @@ import lombok.Setter;
 public class Drink {
 
     private String name;
-    private float cost;
+    private int cost;
     private String productId;
 
-    public Drink(String name, float cost, String productId) {
+    public Drink(String name, int cost, String productId) {
         this.name = name;
         this.cost = cost;
         this.productId = productId;

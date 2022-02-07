@@ -10,17 +10,17 @@ public class User {
     private Long userID;
     private long registerDate;
     private String name;
-    private double credit;
+    private int credit;
     private String tagId;
 
-    public User(Long userID, long registerDate, String name, double credit) {
+    public User(Long userID, long registerDate, String name, int credit) {
         this.userID = userID;
         this.registerDate = registerDate;
         this.name = name;
         this.credit = credit;
     }
 
-    public User(Long userID, long registerDate, String name, double credit, String tagId) {
+    public User(Long userID, long registerDate, String name, int credit, String tagId) {
         this.userID = userID;
         this.registerDate = registerDate;
         this.name = name;

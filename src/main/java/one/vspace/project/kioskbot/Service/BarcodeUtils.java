@@ -12,13 +12,13 @@ import java.awt.image.BufferedImage;
 import java.util.*;
 import java.util.stream.IntStream;
 
-public class DecodeBarCodeService {
+public class BarcodeUtils {
 
     private static final Map<DecodeHintType, Object> HINTS;
     private static final Map<DecodeHintType, Object> HINTS_PURE;
 
-    int[] filter = {1, 2, 1, 2, 4, 2, 1, 2, 1};
-    int filterWidth = 3;
+    private static final int[] filter = {1, 2, 1, 2, 4, 2, 1, 2, 1};
+    private static final int filterWidth = 3;
 
     static {
         HINTS = new EnumMap<>(DecodeHintType.class);
@@ -28,7 +28,7 @@ public class DecodeBarCodeService {
         HINTS_PURE.put(DecodeHintType.PURE_BARCODE, Boolean.TRUE);
     }
 
-    public String decodeCode(BufferedImage image) throws ReaderException {
+    public static String decode(BufferedImage image) throws ReaderException {
 
         BufferedImage image3 = blur(makeToGreyScale(image), filter, filterWidth);
 
@@ -96,7 +96,7 @@ public class DecodeBarCodeService {
         return "";
     }
 
-    public BufferedImage makeToGreyScale(BufferedImage image){
+    private static BufferedImage makeToGreyScale(BufferedImage image){
 
             BufferedImage result = new BufferedImage(
                     image.getWidth(),
@@ -124,7 +124,7 @@ public class DecodeBarCodeService {
 
     }
 
-    public static BufferedImage blur(BufferedImage image, int[] filter, int filterWidth) {
+    private static BufferedImage blur(BufferedImage image, int[] filter, int filterWidth) {
         if (filter.length % filterWidth != 0) {
             throw new IllegalArgumentException("filter contains a incomplete row");
         }

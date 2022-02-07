@@ -29,7 +29,6 @@ public class DBService {
         dbObject.put("registerDate", user.getRegisterDate());
         dbObject.put("name", user.getName());
         dbObject.put("credit", user.getCredit());
-        dbObject.put("tagID", Constants.NO_TAG);
         userData.insertOne(dbObject);
     }
 
@@ -57,16 +56,15 @@ public class DBService {
         ArrayList<Document> dataBaseUser = userData.find(eq("userID", userId)).into(new ArrayList<>());
         if(dataBaseUser.size()>0){
             return new User((long) dataBaseUser.get(0).get("userID"), (long) dataBaseUser.get(0).get("registerDate"),
-                    (String) dataBaseUser.get(0).get("name"), (double) dataBaseUser.get(0).get("credit"), (String) dataBaseUser.get(0).get("tagID"));
+                    (String) dataBaseUser.get(0).get("name"), (int) dataBaseUser.get(0).get("credit"), (String) dataBaseUser.get(0).get("tagID"));
         } else {
             throw new UserNotFoundException(userId + " not found!");
         }
     }
 
-    public void setAmount(long userId, double credit, MongoClient mongoClient) {
+    public void setAmount(long userId, int credit, MongoClient mongoClient) {
         MongoCollection<Document> userData = mongoClient.getDatabase(databaseName).getCollection(collectionName);
-        double newAmount = getAmount(userId, mongoClient) + credit;
-        userData.updateOne(new Document("userID", userId), new Document("$set", new Document("credit", newAmount)));
+        userData.updateOne(new Document("userID", userId), new Document("$inc", new Document("credit", credit)));
 
     }
 
@@ -74,7 +72,7 @@ public class DBService {
         MongoCollection<Document> userData = mongoClient.getDatabase(databaseName).getCollection(collectionName);
         ArrayList<Document> dataBaseUser = userData.find(eq("userID", userId)).into(new ArrayList<>());
         if(dataBaseUser.size() > 0){
-            return (double) dataBaseUser.get(0).get("credit");
+            return (int) dataBaseUser.get(0).get("credit");
         } else {
             return -1;
         }
@@ -98,28 +96,20 @@ public class DBService {
             ArrayList<Document> dataBaseUser = userData.find(eq("tagID", tagId)).into(new ArrayList<>());
             userData.deleteOne(new Document("tagID", tagId));
             setTransponder(userId, (String) dataBaseUser.get(0).get("tagID"), mongoClient);
-            setAmount(userId, (double) dataBaseUser.get(0).get("credit"), mongoClient);
+            setAmount(userId, (int) dataBaseUser.get(0).get("credit"), mongoClient);
         }
     }
 
     public boolean haveUserTransponder(long userId, MongoClient mongoClient){
         MongoCollection<Document> userData = mongoClient.getDatabase(databaseName).getCollection(collectionName);
         ArrayList<Document> dataBaseUser = userData.find(eq("userID", userId)).into(new ArrayList<>());
-        if(dataBaseUser.get(0).get("tagID").equals(Constants.NO_TAG)){
-            return false;
-        } else {
-            return true;
-        }
+        return dataBaseUser.get(0).containsKey("tagID");
     }
 
     public boolean doesTagIdExist(String tagId, MongoClient mongoClient){
         MongoCollection<Document> userData = mongoClient.getDatabase(databaseName).getCollection(collectionName);
         ArrayList<Document> dataBaseUser = userData.find(eq("tagID", tagId)).into(new ArrayList<>());
-        if(dataBaseUser.isEmpty()){
-            return false;
-        } else {
-            return true;
-        }
+        return dataBaseUser.isEmpty();
     }
 
 }
