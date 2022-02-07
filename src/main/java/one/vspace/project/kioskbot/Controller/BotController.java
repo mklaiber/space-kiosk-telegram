@@ -261,13 +261,13 @@ public class BotController {
                     sendMessage(userId, "An error occurred!");
                     LOG.error("IOException");
                 } catch (ReaderException e) {
-                    sendMessage(userId, "Send as uncompressed file!");
-                    LOG.error("No code in the picture");
+                    sendMessage(userId, "No code detected.\nSend as UNCOMPRESSED file!");
+                    LOG.error("No code in picture");
                 } catch (NumberFormatException e) {
                     sendMessage(userId, "Code: " + codeContent);
                     LOG.info(update.message().from().lastName() + ", " + update.message().from().firstName() + " Code: " + codeContent);
                 } catch (NullPointerException e) {
-                    sendMessage(userId, "No supported file!");
+                    sendMessage(userId, "Filetype not supported!");
                 } catch (ArticleNotFoundException e) {
                     sendMessage(userId, "No article Found!");
                     LOG.error("Article not found!");
