@@ -287,13 +287,13 @@ public class BotController {
         }
     }
 
-    private void getCommandExecuted(Update update, MongoClient db) {
+    private void getCommandExecuted(Update update, MongoClient mongoClient) {
         long userID = update.message().from().id();
-        sendMessage(userID, "Your current amount ist " + decimalFormat.format(dbService.getAmount(userID, db)) + "€");
+        sendMessage(userID, "Your current amount ist " + decimalFormat.format(dbService.getAmount(userID, mongoClient)) + "€");
     }
 
 
-    private void removeCommandExecuted(Update update, MongoClient db) {
+    private void removeCommandExecuted(Update update, MongoClient mongoClient) {
         long userID = update.message().from().id();
         if (!requestMap.containsKey(userID)) {
             requestMap.put(userID, Constants.REQUEST_REMOVE_AMOUNT);
@@ -303,7 +303,7 @@ public class BotController {
         }
     }
 
-    private void addCommandExecuted(Update update, MongoClient db) {
+    private void addCommandExecuted(Update update, MongoClient mongoClient) {
         long userID = update.message().from().id();
         if (!requestMap.containsKey(userID)) {
             requestMap.put(userID, Constants.REQUESTED_ADD_AMOUNT);
@@ -313,13 +313,13 @@ public class BotController {
         }
     }
 
-    private void updateCommandExecuted(Update update, MongoClient db) {
+    private void updateCommandExecuted(Update update, MongoClient mongoClient) {
         long userID = update.message().from().id();
         updateDrinkList();
         sendMessage(userID, "Drinklist has been successfully updated.");
     }
 
-    private void codeCommandExecuted(Update update, MongoClient db) {
+    private void codeCommandExecuted(Update update, MongoClient mongoClient) {
         long userID = update.message().from().id();
         String code = update.message().text().split(" ")[1];
         Drink currentDrink = null;
@@ -333,7 +333,7 @@ public class BotController {
                 + ", Product: " + currentDrink.getName() + ", Kosten: " + currentDrink.getCost() + "€");
     }
 
-    private void deleteCommandExecuted(Update update, MongoClient db) {
+    private void deleteCommandExecuted(Update update, MongoClient mongoClient) {
         long userID = update.message().from().id();
         if (!requestMap.containsKey(userID)) {
             requestMap.put(userID, Constants.REQUEST_DELETE);
@@ -343,7 +343,7 @@ public class BotController {
         }
     }
 
-    private void transponderCommandExecuted(Update update, MongoClient db) {
+    private void transponderCommandExecuted(Update update, MongoClient mongoClient) {
         long userID = update.message().from().id();
         if (!requestMap.containsKey(userID)) {
             requestMap.put(userID, Constants.REQUEST_TRANSPONDER);
@@ -353,7 +353,7 @@ public class BotController {
         }
     }
 
-    private void nameCommandExecuted(Update update, MongoClient db) {
+    private void nameCommandExecuted(Update update, MongoClient mongoClient) {
         long userID = update.message().from().id();
         if (!requestMap.containsKey(userID)) {
             requestMap.put(userID, Constants.REQUESTED_NAME);
