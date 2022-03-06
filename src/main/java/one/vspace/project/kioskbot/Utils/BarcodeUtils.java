@@ -1,4 +1,4 @@
-package one.vspace.project.kioskbot.Service;
+package one.vspace.project.kioskbot.Utils;
 
 import com.google.zxing.*;
 import com.google.zxing.common.GlobalHistogramBinarizer;

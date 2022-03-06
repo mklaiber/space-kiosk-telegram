@@ -68,13 +68,17 @@ public class DBService {
 
     }
 
-    public double getAmount(long userId, MongoClient mongoClient) {
-        MongoCollection<Document> userData = mongoClient.getDatabase(databaseName).getCollection(collectionName);
-        ArrayList<Document> dataBaseUser = userData.find(eq("userID", userId)).into(new ArrayList<>());
-        if(dataBaseUser.size() > 0){
-            return (int) dataBaseUser.get(0).get("credit");
-        } else {
-            return -1;
+    public int getAmount(long userId, MongoClient mongoClient) throws IllegalArgumentException{
+        try {
+            MongoCollection<Document> userData = mongoClient.getDatabase(databaseName).getCollection(collectionName);
+            ArrayList<Document> dataBaseUser = userData.find(eq("userID", userId)).into(new ArrayList<>());
+            if (dataBaseUser.size() > 0) {
+                return (int) dataBaseUser.get(0).get("credit");
+            } else {
+                return -1;
+            }
+        } catch (IllegalArgumentException e){
+            throw new IllegalArgumentException("Message was too big or no number.");
         }
     }
 
@@ -88,15 +92,17 @@ public class DBService {
         userData.deleteOne(new Document("userID", userId));
     }
 
-    public void setTransponder(Long userId, String tagId, MongoClient mongoClient){
+    public int setTransponder(Long userId, String tagId, MongoClient mongoClient){
         MongoCollection<Document> userData = mongoClient.getDatabase(databaseName).getCollection(collectionName);
         if(!doesTagIdExist(tagId, mongoClient)) {
             userData.updateOne(new Document("userID", userId), new Document("$set", new Document("tagID", tagId)));
+            return -1;
         } else {
             ArrayList<Document> dataBaseUser = userData.find(eq("tagID", tagId)).into(new ArrayList<>());
             userData.deleteOne(new Document("tagID", tagId));
-            setTransponder(userId, (String) dataBaseUser.get(0).get("tagID"), mongoClient);
+            setTransponder(userId, tagId, mongoClient);
             setAmount(userId, (int) dataBaseUser.get(0).get("credit"), mongoClient);
+            return (int) dataBaseUser.get(0).get("credit");
         }
     }
 
@@ -109,7 +115,7 @@ public class DBService {
     public boolean doesTagIdExist(String tagId, MongoClient mongoClient){
         MongoCollection<Document> userData = mongoClient.getDatabase(databaseName).getCollection(collectionName);
         ArrayList<Document> dataBaseUser = userData.find(eq("tagID", tagId)).into(new ArrayList<>());
-        return dataBaseUser.isEmpty();
+        return !dataBaseUser.isEmpty();
     }
 
 }
