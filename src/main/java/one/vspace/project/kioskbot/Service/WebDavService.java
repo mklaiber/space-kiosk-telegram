@@ -11,18 +11,17 @@ import java.io.*;
 
 public class WebDavService {
 
-    private static ConfigValues configValues;
-
-    public WebDavService(ConfigValues configValues){
-        this.configValues = configValues;
-    }
+    private final String webDavUserID = System.getenv("WEBDAV_USER_ID_ENV");
+    private final String webDavPassword = System.getenv("WEBDAV_PASSWORD_ENV");
+    private final String webDavUri = System.getenv("WEBDAV_URI_ENV");
+    private final String webDavFileName = System.getenv("WEBDAV_FILE_NAME");
 
     private static final Logger LOG = LoggerFactory.getLogger(WebDavService.class);
 
     public String downloadWebDav(){
-        Sardine sardine = SardineFactory.begin(configValues.getWebdavUserId(), configValues.getWebdavPassword());
+        Sardine sardine = SardineFactory.begin(webDavUserID, webDavPassword);
         try {
-            InputStream inputStream = sardine.get(configValues.getWebdavURI() + configValues.getWebdavFileName());
+            InputStream inputStream = sardine.get(webDavUri + webDavFileName);
             ByteArrayOutputStream byteArrayOutputStream = new ByteArrayOutputStream();
             byte[] buffer = new byte[1024];
             int numbersRead;

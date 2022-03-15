@@ -16,22 +16,24 @@ public class DBConnector {
 
     private static MongoClient mongoClient;
     private static DBConnector dbConnector;
+    private final static String mongoDBHostName = System.getenv("MONGODB_HOST_NAME_ENV");
+    private final static int mongoDBHostPort = Integer.parseInt(System.getenv("MONGODB_HOST_PORT_ENV"));
 
-    private DBConnector(ConfigValues configValues) {
+    private DBConnector() {
         MongoClientSettings settings =
                 MongoClientSettings.builder()
                         .applyToConnectionPoolSettings(builder ->
                                 builder.maxSize(40).minSize(10))
                         .applyToClusterSettings(builder ->
-                                builder.hosts(Arrays.asList(new ServerAddress(configValues.getMongoDBHostName(), Integer.parseInt(configValues.getMongoDBHostPort())))))
+                                builder.hosts(Arrays.asList(new ServerAddress(mongoDBHostName, mongoDBHostPort))))
                         .build();
 
         mongoClient = MongoClients.create(settings);
     }
 
-    public static MongoClient getConnection(ConfigValues configValues) {
+    public static MongoClient getConnection() {
         if(dbConnector == null){
-            dbConnector = new DBConnector(configValues);
+            dbConnector = new DBConnector();
         }
         return mongoClient;
     }

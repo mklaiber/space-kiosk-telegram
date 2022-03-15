@@ -36,19 +36,17 @@ public class BotController {
 
     private static final Logger LOG = LoggerFactory.getLogger(BotController.class);
 
-    private ConfigValues configValues = getConfigValues();
-
     private Map<Long, String> requestMap = new HashMap<>();
 
-    private DBService dbService = new DBService(configValues);
+    private DBService dbService = new DBService();
 
-    private TelegramBot bot = new TelegramBot(configValues.getTelegramBotToken());
+    private TelegramBot bot = new TelegramBot(System.getenv("TELEGRAM_BOT_TOKEN_ENV"));
 
     private Date date = new Date();
 
     private static final DecimalFormat decimalFormat = new DecimalFormat("0.00");
 
-    private WebDavService webDavDrinkAccessor = new WebDavService(getConfigValues());
+    private WebDavService webDavDrinkAccessor = new WebDavService();
 
     private HelperUtils helperUtils = new HelperUtils(bot, webDavDrinkAccessor);
 
@@ -68,22 +66,9 @@ public class BotController {
         });
     }
 
-    public ConfigValues getConfigValues() {
-        try {
-            Gson gson = new Gson();
-            ConfigValues credentials = gson.fromJson(new FileReader("credentials/config.json"), ConfigValues.class);
-            return credentials;
-        } catch (FileNotFoundException e) {
-            e.printStackTrace();
-            return null;
-        }
-    }
-
-
-
     public void process(Update update) {
 
-        MongoClient db = DBConnector.getConnection(configValues);
+        MongoClient db = DBConnector.getConnection();
         long userId = update.message().from().id();
 
         if (dbService.haveUserAccountInDB(userId, db) || isStartOrRegisterOrMultilevelCommand(update)) {

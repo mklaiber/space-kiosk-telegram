@@ -14,13 +14,8 @@ import static com.mongodb.client.model.Filters.eq;
 
 public class DBService {
 
-    private String collectionName;
-    private String databaseName;
-
-    public DBService(ConfigValues configValues){
-        this.collectionName = configValues.getMongoDBCollectionName();
-        this.databaseName = configValues.getMongoDBDatabaseName();
-    }
+    private final String collectionName = System.getenv("MONGODB_COLLECTION_NAME_ENV");
+    private final String databaseName = System.getenv("MONGODB_DATABASE_NAME_ENV");
 
     public void addNewUser(User user, MongoClient mongoClient) {
         MongoCollection<Document> userData = mongoClient.getDatabase(databaseName).getCollection(collectionName);
