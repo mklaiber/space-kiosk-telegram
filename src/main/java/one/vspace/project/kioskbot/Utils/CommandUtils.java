@@ -145,22 +145,14 @@ public class CommandUtils {
 
     public void updateCommandExecuted(Update update, MongoClient mongoClient) {
         long userID = update.message().from().id();
-        helperUtils.updateDrinkList();
+        helperUtils.setDrinkList();
         helperUtils.sendMessage(userID, "Drinklist has been successfully updated.");
     }
 
     public void codeCommandExecuted(Update update, MongoClient mongoClient) {
         long userID = update.message().from().id();
-        String code = update.message().text().split(" ")[1];
-        Drink currentDrink = null;
-        try {
-            currentDrink = helperUtils.getDrinkWithCode(code);
-        } catch (ArticleNotFoundException e) {
-            helperUtils.sendMessage(userID, "Article not found!");
-            e.printStackTrace();
-        }
-        helperUtils.sendMessage(userID, "Code: " + code
-                + ", Product: " + currentDrink.getName() + ", Kosten: " + currentDrink.getCost() + "€");
+        requestMap.put(userID, Constants.REQUEST_MANUAL_EAN_CODE);
+        helperUtils.sendMessage(userID, "Enter the EAN-Code.");
     }
 
     public void deleteCommandExecuted(Update update, MongoClient mongoClient) {
@@ -273,5 +265,23 @@ public class CommandUtils {
     public void noPossibleAction(Update update, MongoClient mongoClient) {
         long userID = update.message().from().id();
         helperUtils.sendMessage(userID, "No possible action.");
+    }
+
+    public void requestedManualEANCodeCommandWasExecuted(Update update, MongoClient db) {
+        long userID = update.message().from().id();
+        String code = update.message().text();
+        Drink currentDrink = null;
+        try {
+            currentDrink = helperUtils.getDrinkWithCode(code);
+        } catch (ArticleNotFoundException e) {
+            helperUtils.sendMessage(userID, "Article not found!");
+            e.printStackTrace();
+        } finally {
+            requestMap.remove(userID);
+        }
+        helperUtils.sendMessage(userID, "Code: " + code
+                + ", Product: " + currentDrink.getName() + ", Kosten: "
+                + helperUtils.getAmountAsIntegerInEuro(currentDrink.getCost()) + "€"
+                + "\nTo remove this amount, execute /remove and enter the Amount.");
     }
 }

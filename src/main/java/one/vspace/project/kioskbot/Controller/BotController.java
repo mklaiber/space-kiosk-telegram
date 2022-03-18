@@ -59,7 +59,7 @@ public class BotController {
     }
 
     public void botControl() {
-        helperUtils.updateDrinkList();
+        helperUtils.setDrinkList();
         bot.setUpdatesListener(updates -> {
             updates.forEach(this::process);
             return UpdatesListener.CONFIRMED_UPDATES_ALL;
@@ -138,6 +138,7 @@ public class BotController {
     }
 
     private void singleLevelCommandWasReceived(Update update, MongoClient db) {
+        helperUtils.setDrinkList();
         switch (update.message().text()) {
             case Constants.START_COMMAND:
                 commandUtils.startCommandExecuted(update, db);
@@ -206,6 +207,8 @@ public class BotController {
             case Constants.REQUEST_NEW_TRANSPONDER_USER:
                 commandUtils.requestedNewTransponderUserCommandWasExecuted(update, db);
                 break;
+            case Constants.REQUEST_MANUAL_EAN_CODE:
+                commandUtils.requestedManualEANCodeCommandWasExecuted(update, db);
         }
     }
 

@@ -33,7 +33,11 @@ public class HelperUtils {
 
     private List<Drink> drinkList;
 
-    public List<Drink> updateDrinkList() {
+    public void setDrinkList() {
+        this.drinkList = updateDrinkList();
+    }
+
+    private List<Drink> updateDrinkList() {
         lastDrinksUpdate = Instant.now();
         String[] drinks = webDavService.downloadWebDav().replace(',', '.').split("\n");
         List<Drink> drinkList = new ArrayList<>();

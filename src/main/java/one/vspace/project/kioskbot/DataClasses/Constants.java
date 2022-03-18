@@ -21,5 +21,6 @@ public class Constants {
     public static final String REQUEST_REMOVE_AMOUNT = "REMOVE_AMOUNT";
     public static final String REQUEST_TRANSPONDER = "ADD_TRANSPONDER";
     public static final String REQUEST_NEW_USER = "ADD_NEW_USER";
+    public static final String REQUEST_MANUAL_EAN_CODE = "REQUEST_MANUAL_EAN_CODE";
     public static final String REQUEST_NEW_TRANSPONDER_USER = "ADD_NEW_TRANSPONDER_USER";
 }
