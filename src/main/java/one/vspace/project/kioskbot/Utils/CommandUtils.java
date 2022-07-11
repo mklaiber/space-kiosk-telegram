@@ -97,7 +97,7 @@ public class CommandUtils {
             helperUtils.sendMessage(userId, "Your account has been connected with Tag " + transponderId + ".");
         } else {
             helperUtils.sendMessage(userId, "Your account has been connected with Tag " + transponderId + "."
-            + "\nYour credit " + decimalFormat.format(helperUtils.getAmountAsIntegerInEuro(amount)) + "€ has been added to your account.");
+            + "\nYour credit " + decimalFormat.format(helperUtils.getAmountAsIntegerInEuro(amount)) + "€ have been added to your account.");
         }
         requestMap.remove(userId);
     }
@@ -214,7 +214,7 @@ public class CommandUtils {
         }
         if (dbService.doesTagIdExist(update.message().text(), mongoClient)) {
             dbService.setUserToExistingTransponder(newUser, mongoClient);
-            helperUtils.sendMessage(userID, "Hallo " + firstName + ", your account have been created."
+            helperUtils.sendMessage(userID, "Hallo " + firstName + ", your account has been created."
                     + "\nYour TagID is " + tagId);
         } else {
             helperUtils.sendMessage(userID, "TagID not found. Please send /register again.");
@@ -251,8 +251,8 @@ public class CommandUtils {
                     + update.message().from().firstName() + ", you already have an account.");
             return;
         }
-        helperUtils.sendMessage(userID, "Do you have already a transponder from the physical kiosk system?"
-                + "\nSend /yes if you have and /no if not. You also can connect your tag later.");
+        helperUtils.sendMessage(userID, "Do you already have a transponder from the physical kiosk system?"
+                + "\nSend /yes if you do and /no if don't. You can also connect your tag later.");
         requestMap.put(userID, Constants.REQUEST_NEW_USER);
     }
 

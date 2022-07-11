@@ -33,19 +33,22 @@ public class HelperUtils {
 
     private List<Drink> drinkList;
 
-    public void setDrinkList() {
-        this.drinkList = updateDrinkList();
+    public void setDrinkList() throws IndexOutOfBoundsException{
+            this.drinkList = updateDrinkList();
     }
 
-    private List<Drink> updateDrinkList() {
-        lastDrinksUpdate = Instant.now();
-        String[] drinks = webDavService.downloadWebDav().replace(',', '.').split("\n");
-        List<Drink> drinkList = new ArrayList<>();
-        for (String drink : drinks) {
-            String[] finalDrinks = drink.trim().split(";");
-            drinkList.add(new Drink(finalDrinks[0].trim(), (int) Float.parseFloat(finalDrinks[1].trim()) * 100, finalDrinks[2].trim()));
-        }
-        return drinkList;
+    private List<Drink> updateDrinkList() throws IndexOutOfBoundsException {
+            lastDrinksUpdate = Instant.now();
+            String[] drinks = webDavService.downloadWebDav().replace(',', '.').split("\n");
+            List<Drink> drinkList = new ArrayList<>();
+            for (String drink : drinks) {
+                String[] finalDrinks = drink.trim().split(";");
+                if(finalDrinks.length < 3){
+                    throw new IndexOutOfBoundsException("Wrong drinklist definition!");
+                }
+                drinkList.add(new Drink(finalDrinks[0].trim(), (int) Float.parseFloat(finalDrinks[1].trim()) * 100, finalDrinks[2].trim()));
+            }
+            return drinkList;
     }
 
     public Drink getDrinkWithCode(String code) throws ArticleNotFoundException {

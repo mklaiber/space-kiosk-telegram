@@ -52,6 +52,8 @@ public class BotController {
 
     private CommandUtils commandUtils = new CommandUtils(dbService, helperUtils, requestMap);
 
+    private long lastDrinklistUpdate = 0;
+
     public static void main(String args[]) {
 
         new BotController().botControl();
@@ -59,14 +61,22 @@ public class BotController {
     }
 
     public void botControl() {
-        helperUtils.setDrinkList();
-        bot.setUpdatesListener(updates -> {
-            updates.forEach(this::process);
-            return UpdatesListener.CONFIRMED_UPDATES_ALL;
-        });
+            bot.setUpdatesListener(updates -> {
+                updates.forEach(this::process);
+                return UpdatesListener.CONFIRMED_UPDATES_ALL;
+            });
     }
 
     public void process(Update update) {
+
+        if (lastDrinklistUpdate - date.getTime() >= 1800000){ //Updates DrinkList when it's older than 30 mins
+            try {
+                helperUtils.setDrinkList();
+                lastDrinklistUpdate = date.getTime();
+            } catch (IndexOutOfBoundsException e) {
+                helperUtils.sendMessage(update.message().from().id(), e.toString());
+            }
+        }
 
         MongoClient db = DBConnector.getConnection();
         long userId = update.message().from().id();
