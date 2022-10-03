@@ -1,5 +1,6 @@
 package one.vspace.project.kioskbot.Utils;
 
+import com.mongodb.client.MongoClient;
 import com.pengrad.telegrambot.TelegramBot;
 import com.pengrad.telegrambot.model.Update;
 import com.pengrad.telegrambot.request.SendMessage;
@@ -10,6 +11,7 @@ import one.vspace.project.kioskbot.Controller.BotController;
 import one.vspace.project.kioskbot.DataClasses.Drink;
 import one.vspace.project.kioskbot.Exceptions.ArticleNotFoundException;
 import one.vspace.project.kioskbot.Exceptions.TooBigNumberException;
+import one.vspace.project.kioskbot.Service.DBService;
 import one.vspace.project.kioskbot.Service.WebDavService;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -28,13 +30,28 @@ public class HelperUtils {
     private TelegramBot bot;
     @NonNull
     private WebDavService webDavService;
+    @NonNull
+    private DBService dbService;
 
     private Instant lastDrinksUpdate;
 
     private List<Drink> drinkList;
 
-    public void setDrinkList() throws IndexOutOfBoundsException{
+    public void storeDrinkListInDB(List<Drink> drinkList, MongoClient mongoClient) {
+        for (Drink drink : drinkList) {
+            if(!dbService.isDrinkAlreadyInDB(drink, mongoClient)){
+                if(!dbService.hasSometingChangedInDrinkDBObject(drink, mongoClient)){
+                    dbService.addNewDrink(drink, mongoClient);
+                } else {
+                    dbService.updateDrink(drink, drink.getProductId(), mongoClient);
+                }
+            }
+        }
+    }
+
+    public List<Drink> setDrinkList() throws IndexOutOfBoundsException{
             this.drinkList = updateDrinkList();
+            return this.drinkList;
     }
 
     private List<Drink> updateDrinkList() throws IndexOutOfBoundsException {

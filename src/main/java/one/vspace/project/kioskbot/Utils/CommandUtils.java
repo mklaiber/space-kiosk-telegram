@@ -1,7 +1,6 @@
 package one.vspace.project.kioskbot.Utils;
 
 import com.mongodb.client.MongoClient;
-import com.pengrad.telegrambot.TelegramBot;
 import com.pengrad.telegrambot.model.Update;
 import lombok.NonNull;
 import lombok.RequiredArgsConstructor;
@@ -212,7 +211,7 @@ public class CommandUtils {
         } else {
             newUser = new User(userID, date.getTime(), (firstName + " " + lastName), 0, tagId);
         }
-        if (dbService.doesTagIdExist(update.message().text(), mongoClient)) {
+        if (dbService.isTagIdInDB(update.message().text(), mongoClient)) {
             dbService.setUserToExistingTransponder(newUser, mongoClient);
             helperUtils.sendMessage(userID, "Hallo " + firstName + ", your account has been created."
                     + "\nYour TagID is " + tagId);

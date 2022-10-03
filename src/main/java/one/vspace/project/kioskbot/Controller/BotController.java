@@ -48,7 +48,7 @@ public class BotController {
 
     private WebDavService webDavDrinkAccessor = new WebDavService();
 
-    private HelperUtils helperUtils = new HelperUtils(bot, webDavDrinkAccessor);
+    private HelperUtils helperUtils = new HelperUtils(bot, webDavDrinkAccessor, dbService);
 
     private CommandUtils commandUtils = new CommandUtils(dbService, helperUtils, requestMap);
 
@@ -69,16 +69,17 @@ public class BotController {
 
     public void process(Update update) {
 
+        MongoClient db = DBConnector.getConnection();
+
         if (lastDrinklistUpdate - date.getTime() >= 1800000){ //Updates DrinkList when it's older than 30 mins
             try {
-                helperUtils.setDrinkList();
+                helperUtils.storeDrinkListInDB(helperUtils.setDrinkList(), db);
                 lastDrinklistUpdate = date.getTime();
             } catch (IndexOutOfBoundsException e) {
                 helperUtils.sendMessage(update.message().from().id(), e.toString());
             }
         }
 
-        MongoClient db = DBConnector.getConnection();
         long userId = update.message().from().id();
 
         if (dbService.haveUserAccountInDB(userId, db) || isStartOrRegisterOrMultilevelCommand(update)) {
